@@ -5,7 +5,7 @@ const { callbackify } = require("util");
 
 const conn = new jsforce.Connection();
 const userName = "username";
-const password = "pasword+token";
+const password = "password+token";
 
 conn.login(userName, password, function (err, res) {
 	if (err) {
@@ -19,7 +19,7 @@ conn.login(userName, password, function (err, res) {
 		"SELECT LogFile, EventType, CreatedDate FROM EventLogFile WHERE EventType IN ('API', 'RestApi', 'APITotalUsage')"
 	).then((result) => {
 		result.records.forEach((record) => {
-			const filename = record.CreatedDate + "_Log.csv";
+			const filename = record.CreatedDate.split(".")[0].replace(/:/g, "_") + ".csv";
 			const dataPath = record.LogFile;
 			const headers = {
 				Authorization: "Bearer " + conn.accessToken,
@@ -31,7 +31,7 @@ conn.login(userName, password, function (err, res) {
 			};
 			console.log("Downloading: " + filename);
 			fetch(conn.instanceUrl + dataPath, options)
-				.then((result) => {
+				.then((result) => {	   
 					result.body.pipe(fs.createWriteStream(filename));
 				})
 				.catch((error) => {
